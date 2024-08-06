@@ -1,65 +1,68 @@
 <?php
-
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Ticket;
-use Illuminate\Support\Facades\Auth;
 
 class TicketController extends Controller
 {
+    // Public method for fetching all tickets
     public function index()
     {
-        // Return all tickets
-        return Ticket::all();
+        return Ticket::all(); // Adjust as needed to fit your data retrieval logic
     }
 
+    // Public method for fetching a specific ticket
+    public function show($id)
+    {
+        $ticket = Ticket::findOrFail($id);
+        return $ticket;
+    }
+
+    // Method for creating a new ticket (requires authentication)
     public function store(Request $request)
     {
-        $request->validate([
+        $this->authorize('create', Ticket::class);
+
+        // Validate the request data
+        $validatedData = $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'required|string',
+            'status' => 'required|string',
         ]);
 
-        $ticket = Ticket::create([
-            'title' => $request->title,
-            'description' => $request->description,
-            'status' => $request->status ?? 'open',
-            'user_id' => Auth::id(),
-        ]);
+        // Add the authenticated user's ID to the ticket data
+        $validatedData['user_id'] = $request->user()->id;
+        // Create the ticket
+        $ticket = Ticket::create($validatedData);
 
         return response()->json($ticket, 201);
     }
 
-    public function show($id)
-    {
-        $ticket = Ticket::findOrFail($id);
-        return response()->json($ticket);
-    }
-
+    // Method for updating a ticket (requires authentication)
     public function update(Request $request, $id)
     {
-        $request->validate([
-            'title' => 'required|string|max:255',
-            'description' => 'required|string',
-            'status' => 'required|in:open,closed,in_progress',
+        $ticket = Ticket::findOrFail($id);
+        $this->authorize('update', $ticket);
+
+        // Validation and ticket update logic
+        $validatedData = $request->validate([
+            'title' => 'sometimes|required|string|max:255',
+            'description' => 'sometimes|required|string',
+            'status' => 'sometimes|required|string',
         ]);
 
-        $ticket = Ticket::findOrFail($id);
-        $this->authorize('update', $ticket); // Ensure the user can update the ticket
-
-        $ticket->update($request->all());
-
+        $ticket->update($validatedData);
         return response()->json($ticket);
     }
 
+    // Method for deleting a ticket (requires authentication)
     public function destroy($id)
     {
         $ticket = Ticket::findOrFail($id);
-        $this->authorize('delete', $ticket); // Ensure the user can delete the ticket
+        $this->authorize('delete', $ticket);
 
         $ticket->delete();
-
         return response()->json(null, 204);
     }
 }
