@@ -64,10 +64,15 @@ class AuthController extends Controller
             'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
         ]);
 
-        $user->update([
-            'name' => $request->name,
-            'email' => $request->email,
-        ]);
+        if ($request->hasFile('avatar')) {
+            // Store the avatar file and get its path
+            $path = $request->file('avatar')->store('avatars', 'public');
+            $user->avatar = $path;
+        }
+
+        $user->name = $request->name;
+        $user->email = $request->email;
+        $user->save();
 
         return response()->json(['user' => $user]);
     }
