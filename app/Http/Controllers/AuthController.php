@@ -13,16 +13,21 @@ class AuthController extends Controller
     {
         $credentials = $request->only('email', 'password');
 
-        if (Auth::attempt($credentials)) {
-            $user = Auth::user();
-            $token = $user->createToken('Personal Access Token')->plainTextToken;
-            return response()->json([
-                'token' => $token,
-                'user' => $user,
-            ]);
+        $user = User::where('email', $credentials['email'])->first();
+
+        if (!$user) {
+            return response()->json(['error' => 'The email address is not registered.'], 401);
         }
 
-        return response()->json(['error' => 'Unauthorized'], 401);
+        if (!Auth::attempt($credentials)) {
+            return response()->json(['error' => 'The password is incorrect.'], 401);
+        }
+
+        $token = $user->createToken('Personal Access Token')->plainTextToken;
+        return response()->json([
+            'token' => $token,
+            'user' => $user,
+        ]);
     }
 
     public function logout(Request $request)
