@@ -9,7 +9,8 @@ class TicketController extends Controller
     // Public method for fetching all tickets
     public function index()
     {
-        return Ticket::all(); // Adjust as needed to fit your data retrieval logic
+        $tickets = Ticket::withCount('comments')->get();
+        return response()->json($tickets);
     }
 
     // Public method for fetching a specific ticket
