@@ -20,7 +20,7 @@ Route::middleware('auth:sanctum')->group(function () {
         return $request->user();
     });
     Route::post('/logout', [AuthController::class, 'logout']);
-    Route::put('/update-account', [AuthController::class, 'updateAccount']);
+    Route::post('/update-account', [AuthController::class, 'updateAccount']);
     Route::post('/change-password', [AuthController::class, 'changePassword']);
 
     Route::post('/tickets', [TicketController::class, 'store']);
