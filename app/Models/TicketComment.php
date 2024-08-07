@@ -8,6 +8,8 @@ use Illuminate\Database\Eloquent\Model;
 class TicketComment extends Model {
     use HasFactory;
 
+    protected $fillable = ['ticket_id', 'user_id', 'comment'];
+
     public function ticket() {
         return $this->belongsTo(Ticket::class);
     }
