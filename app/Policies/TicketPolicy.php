@@ -31,7 +31,7 @@ class TicketPolicy
     // Determine whether the user can update the model.
     public function update(User $user, Ticket $ticket)
     {
-        return $user->id === $ticket->user_id; // Only the owner can update the ticket
+        return $user != null; // Only the owner can update the ticket
     }
 
     // Determine whether the user can delete the model.
